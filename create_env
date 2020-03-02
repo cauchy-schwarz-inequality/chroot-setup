@@ -1,0 +1,47 @@
+#!/usr/bin/env bash 
+
+# https://unix.stackexchange.com/questions/198590/what-is-a-bind-mount
+
+chr=$1
+
+mkdir -p $chr/{bin,lib,lib64}
+
+
+cp /bin/{bash,touch,ls,rm,nano,curl,readline,emacs,lsblk,tput,clear} $chr/bin
+cp -r /lib/terminfo $chr/lib/
+
+programs='bash touch ls rm nano curl readline emacs lsblk tput clear'
+echo "Copying dependencies for all programs"
+for program in $programs
+do
+  echo "Setting up $program"
+  cp -r --parents /usr/lib/$program/ $chr 2>/dev/null
+  cp -r --parents /usr/share/$program/ $chr 2>/dev/null
+  cp -r --parents /etc/$program $chr 2>/dev/null
+  list="$(ldd /bin/$program | egrep -o '/lib.*\.[0-9]*')"
+  for i in $list; do cp --parents "$i" "${chr}"; done
+done
+
+echo "Environment created at $chr"
+
+mkdir $chr/proc/
+mkdir $chr/sys/
+mkdir $chr/dev/
+
+sudo mount --bind /dev/tty $chr/dev/tty/ 2>/dev/null
+[ $? -eq 0 ] && echo "Created bindmount at $chr/dev/tty" || :
+sudo mount -t proc proc $chr/proc/ 2>/dev/null
+[ $? -eq 0 ] && echo "Created mountpoint at $chr/proc" || :
+sudo mount --rbind /sys $chr/sys/
+[ $? -eq 0 ] && echo "Created rbind at /sys" || :
+sudo mount --rbind /dev $chr/dev/
+[ $? -eq 0 ] && echo "Created rbind at $chr/dev" || :
+
+
+if [ "$2" == 'chroot' ]
+   then
+	echo "Chrooting in!"
+	sudo chroot $chr /bin/bash
+   else
+	echo "Done"
+ fi
