@@ -1,7 +1,5 @@
 #!/usr/bin/env bash 
 
-# https://unix.stackexchange.com/questions/198590/what-is-a-bind-mount
-
 chr=$1
 
 mkdir -p $chr/{bin,lib,lib64}
