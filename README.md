@@ -23,5 +23,5 @@ I do. I made this mostly for finer grained control.
 
 # TODO
 
-- [] Teardown script 
-- [] Code cleanup
+- [ ] Teardown script 
+- [ ] Code cleanup
